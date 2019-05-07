@@ -1,8 +1,9 @@
 {
+  "author": "kyuuseiryuu",
   "pluginName": "qrcode-scanner",
   "main": "./pages/index.html",
   "preload": "./preload.js",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "logo": "./scanner.png",
   "development": {
     "main": "http://localhost:8000/index.html"
@@ -11,7 +12,8 @@
     "code": "scanner",
     "cmds": [
       "scan", "qrcode", "二维码扫描"
-    ]
+    ],
+    "explain": "二维码扫描"
   }],
   "install": false
 }
