@@ -1,6 +1,7 @@
 {
   "author": "kyuuseiryuu",
   "pluginName": "qrcode-scanner",
+  "homepage": "https://github.com/kyuuseiryuu/utools-plugin-qrcode-scanner",
   "main": "./pages/index.html",
   "preload": "./preload.js",
   "version": "1.0.0",
