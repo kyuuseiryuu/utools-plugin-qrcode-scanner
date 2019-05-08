@@ -12,7 +12,7 @@ const Content = ({ children, ...props }) => {
   // if (!children) return null;
   return (
     <Card className={styles.card} hoverable={true} {...props}>
-      {children || 'test'.repeat(33)}
+      {children}
     </Card>
   );
 };
