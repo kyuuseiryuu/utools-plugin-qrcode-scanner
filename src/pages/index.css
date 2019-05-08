@@ -7,4 +7,5 @@
 .card {
   background: #769fd5;
   color: white;
+  word-break: break-all;
 }
