@@ -28,7 +28,7 @@ const getMediaStream = async (): Promise<MediaStream> => {
 export default function() {
   const [text, setText] = useState('');
   const [copyRightNow, setCopyRightNow] = useState(true);
-  const [media, setMedia] = useState<MediaStream|null|undefined>();
+  const [mediaStream, setMediaStream] = useState<MediaStream|null|undefined>();
   const copy = () => {
     window.utils.setText(text);
     message.success('已复制');
@@ -39,7 +39,7 @@ export default function() {
   useEffect(() => {
     (async () => {
       const m = await getMediaStream();
-      setMedia(m);
+      setMediaStream(m);
     })();
   }, []);
   useEffect(() => {
@@ -48,14 +48,21 @@ export default function() {
       window.utils.setText(text);
     }
   }, [text, copyRightNow]);
+  const reload = async () => {
+    if (!mediaStream) return;
+    mediaStream.getVideoTracks().forEach(m => m.stop());
+    const m = await getMediaStream();
+    setMediaStream(m);
+  };
   return (
     <div className={styles.normal}>
       <Checkbox checked={copyRightNow} onChange={handleCheckChange}>
         <span style={{ userSelect: 'none' }}>扫描即复制</span>
       </Checkbox>
+      &nbsp;<a onClick={reload}>重载摄像头</a>
       <div style={{ textAlign: 'center', marginBottom: '20px' }}>
         <Scanner
-          mediaStream={media}
+          mediaStream={mediaStream}
           scanInterval={100}
           onResult={setText}
           height={HEIGHT}
