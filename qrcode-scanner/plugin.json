@@ -4,7 +4,7 @@
   "homepage": "https://github.com/kyuuseiryuu/utools-plugin-qrcode-scanner",
   "main": "./pages/index.html",
   "preload": "./preload.js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "logo": "./scanner.png",
   "development": {
     "main": "http://localhost:8000/index.html"
