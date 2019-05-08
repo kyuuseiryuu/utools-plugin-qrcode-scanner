@@ -9,7 +9,7 @@ const HEIGHT = 300;
 const WIDTH = 300;
 
 const Content = ({ children, ...props }) => {
-  // if (!children) return null;
+  if (!children) return null;
   return (
     <Card className={styles.card} hoverable={true} {...props}>
       {children}
