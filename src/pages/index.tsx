@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import styles from './index.css';
 import Scanner from '@/components/Scanner';
 import { Modal, Card, message, Checkbox } from 'antd';
+import _ from 'lodash';
 
 declare const window: any;
 
@@ -30,19 +31,13 @@ export default function() {
   const [text, setText] = useState('');
   const [copyRightNow, setCopyRightNow] = useState(true);
   const [mediaStream, setMediaStream] = useState<MediaStream|null|undefined>();
-  const audio = useRef<HTMLAudioElement>(null);
-  const beep = (audio: HTMLAudioElement) => {
-    audio.play().then();
-  };
   const copy = t => () => {
     window.utils.setText(t);
     message.success('已复制');
   };
-  useEffect(() => {
-    window.audio = audio;
-  }, [audio]);
   const handleResult = newText => {
-    if (audio && audio.current) beep(audio.current);
+    console.log(newText, Date.now());
+    new Audio(beepAudio).play().catch(console.error);
     setText(newText);
   };
   const handleCheckChange = e => {
@@ -83,12 +78,11 @@ export default function() {
         <Scanner
           mediaStream={mediaStream}
           scanInterval={100}
-          onResult={handleResult}
+          onResult={_.debounce(handleResult, 400)}
           height={HEIGHT}
           width={WIDTH}
         />
       </div>
-      <audio ref={audio} style={{ display: 'none' }} src={beepAudio} />
       <Content onClick={copy(text)}>{text}</Content>
     </div>
   );
