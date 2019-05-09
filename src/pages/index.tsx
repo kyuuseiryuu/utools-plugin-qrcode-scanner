@@ -1,14 +1,12 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './index.css';
 import Scanner from '@/components/Scanner';
 import { Modal, Card, message, Checkbox } from 'antd';
-import _ from 'lodash';
 
 declare const window: any;
 
 const HEIGHT = 300;
 const WIDTH = 300;
-const beepAudio = require('@/assets/qrcode_completed.mp3');
 
 const Content = ({ children, ...props }) => {
   if (!children) return null;
@@ -27,6 +25,8 @@ const getMediaStream = async (): Promise<MediaStream> => {
   });
 };
 
+const beep = () => window.utils.playSound();
+
 export default function() {
   const [text, setText] = useState('');
   const [copyRightNow, setCopyRightNow] = useState(true);
@@ -37,7 +37,6 @@ export default function() {
   };
   const handleResult = newText => {
     console.log(newText, Date.now());
-    window.utils.playSound();
     setText(newText);
   };
   const handleCheckChange = e => {
@@ -52,7 +51,9 @@ export default function() {
     });
   };
   useEffect(() => {
-    if (copyRightNow && text) {
+    if (!text) return;
+    beep();
+    if (copyRightNow) {
       copy(text)();
     }
   }, [text, copyRightNow]);
@@ -78,7 +79,7 @@ export default function() {
         <Scanner
           mediaStream={mediaStream}
           scanInterval={100}
-          onResult={_.debounce(handleResult, 400)}
+          onResult={handleResult}
           height={HEIGHT}
           width={WIDTH}
         />
