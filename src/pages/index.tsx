@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import styles from './index.css';
 import Scanner from '@/components/Scanner';
 import { Card, message, Checkbox } from 'antd';
@@ -7,6 +7,7 @@ declare const window: any;
 
 const HEIGHT = 300;
 const WIDTH = 300;
+const beepAudio = require('@/assets/qrcode_completed.mp3');
 
 const Content = ({ children, ...props }) => {
   if (!children) return null;
@@ -29,25 +30,35 @@ export default function() {
   const [text, setText] = useState('');
   const [copyRightNow, setCopyRightNow] = useState(true);
   const [media, setMedia] = useState<MediaStream|null|undefined>();
-  const copy = () => {
-    window.utils.setText(text);
+  const audio = useRef<HTMLAudioElement>(null);
+  const beep = (audio: HTMLAudioElement) => () => {
+    audio.play().then();
+  };
+  const copy = t => () => {
+    window.utils.setText(t);
     message.success('已复制');
+  };
+  useEffect(() => {
+    window.audio = audio;
+  }, [audio]);
+  const handleResult = newText => {
+    if (audio && audio.current) {audio.current.play();}
+    setText(newText);
   };
   const handleCheckChange = e => {
     setCopyRightNow(e.target.checked);
   };
+  useEffect(() => {
+    if (copyRightNow && text) {
+      copy(text)();
+    }
+  }, [text, copyRightNow]);
   useEffect(() => {
     (async () => {
       const m = await getMediaStream();
       setMedia(m);
     })();
   }, []);
-  useEffect(() => {
-    if (copyRightNow && text) {
-      message.success('已复制');
-      window.utils.setText(text);
-    }
-  }, [text, copyRightNow]);
   return (
     <div className={styles.normal}>
       <Checkbox checked={copyRightNow} onChange={handleCheckChange}>
@@ -57,12 +68,13 @@ export default function() {
         <Scanner
           mediaStream={media}
           scanInterval={100}
-          onResult={setText}
+          onResult={handleResult}
           height={HEIGHT}
           width={WIDTH}
         />
       </div>
-      <Content onClick={copy}>{text}</Content>
+      <audio ref={audio} style={{ display: 'none' }} src={beepAudio} />
+      <Content onClick={copy(text)}>{text}</Content>
     </div>
   );
 }
