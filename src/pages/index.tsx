@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import styles from './index.css';
 import Scanner from '@/components/Scanner';
 import { Modal, Card, message, Checkbox } from 'antd';
+message.config({ maxCount: 1 });
 
 declare const window: any;
 
@@ -24,8 +25,6 @@ const getMediaStream = async (): Promise<MediaStream> => {
     }, resolve, reject);
   });
 };
-
-const beep = () => window.utils.playSound();
 
 export default function() {
   const [text, setText] = useState('');
@@ -51,9 +50,7 @@ export default function() {
     });
   };
   useEffect(() => {
-    if (!text) return;
-    beep();
-    if (copyRightNow) {
+    if (copyRightNow && text) {
       copy(text)();
     }
   }, [text, copyRightNow]);
