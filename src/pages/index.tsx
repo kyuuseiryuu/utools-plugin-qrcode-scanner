@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styles from './index.css';
 import Scanner from '@/components/Scanner';
-import { Card, message, Checkbox } from 'antd';
+import { Modal, Card, message, Checkbox } from 'antd';
 
 declare const window: any;
 
@@ -36,10 +36,18 @@ export default function() {
   const handleCheckChange = e => {
     setCopyRightNow(e.target.checked);
   };
+  const retry = () => {
+    Modal.error({
+      content: '摄像头调用失败~',
+      okText: '重试',
+      onOk: reload,
+      cancelText: '先这样...',
+    });
+  };
   useEffect(() => {
     (async () => {
-      const m = await getMediaStream();
-      setMediaStream(m);
+      const m = await getMediaStream().catch(retry);
+      if (m) setMediaStream(m);
     })();
   }, []);
   useEffect(() => {
@@ -51,15 +59,15 @@ export default function() {
   const reload = async () => {
     if (!mediaStream) return;
     mediaStream.getVideoTracks().forEach(m => m.stop());
-    const m = await getMediaStream();
-    setMediaStream(m);
+    const m = await getMediaStream().catch(retry);
+    if (m) setMediaStream(m);
   };
   return (
     <div className={styles.normal}>
       <Checkbox checked={copyRightNow} onChange={handleCheckChange}>
         <span style={{ userSelect: 'none' }}>扫描即复制</span>
       </Checkbox>
-      &nbsp;<a onClick={reload}>重载摄像头</a>
+      &nbsp;<a onClick={reload} style={{ userSelect: 'none' }}>重载摄像头</a>
       <div style={{ textAlign: 'center', marginBottom: '20px' }}>
         <Scanner
           mediaStream={mediaStream}
