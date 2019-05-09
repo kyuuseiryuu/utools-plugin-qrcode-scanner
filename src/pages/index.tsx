@@ -37,7 +37,7 @@ export default function() {
   };
   const handleResult = newText => {
     console.log(newText, Date.now());
-    new Audio(beepAudio).play().catch(console.error);
+    window.utils.playSound();
     setText(newText);
   };
   const handleCheckChange = e => {
