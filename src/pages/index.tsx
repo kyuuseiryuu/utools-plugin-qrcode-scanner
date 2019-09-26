@@ -31,7 +31,7 @@ export default function() {
   const [copyRightNow, setCopyRightNow] = useState(true);
   const [mediaStream, setMediaStream] = useState<MediaStream|null|undefined>();
   const copy = useCallback(t => {
-    if (!window.utils) {
+    if (!window.utils || !window.utils.setText) {
       window.utils = { setText: console.log }
     }
     window.utils.setText(t);
@@ -74,6 +74,12 @@ export default function() {
   const handleCopy = useCallback(() => {
     copy(text);
   }, [text]);
+  useEffect(() => {
+    if (!window.utils || !window.utils.getMediaStream) {
+      if (!window.utils) window.utils = {};
+      window.utils.getMediaStream = getMediaStream;
+    }
+  }, []);
   return (
     <div className={styles.normal}>
       <Checkbox checked={copyRightNow} onChange={handleCheckChange}>

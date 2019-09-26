@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import QR from 'qrcode-reader';
 
 interface OnCompleteProps {
@@ -16,33 +16,33 @@ interface Props {
 }
 
 function Scanner(props: Props) {
-  const [video, setVideo] = useState<HTMLVideoElement|null|undefined>();
-  const [canvas, setCanvas] = useState<HTMLCanvasElement|undefined|null>();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
-    if (!video || !canvas || !props.mediaStream) return;
-    video.srcObject = props.mediaStream;
-    if (props.onComplete) props.onComplete({ video, canvas });
-    const ctx = canvas.getContext('2d');
+    if (!videoRef.current || !canvasRef.current || !props.mediaStream) return;
+    videoRef.current.srcObject = props.mediaStream;
+    if (props.onComplete) props.onComplete({ video: videoRef.current, canvas: canvasRef.current });
+    const ctx = canvasRef.current.getContext('2d');
     if (!ctx) return;
-    ctx.drawImage(video, 0, 0);
+    ctx.drawImage(videoRef.current, 0, 0);
     const reader = new QR();
     reader.callback = (err, value) => {
       if (err) return;
       if (props.onResult) props.onResult(value.result);
     };
     const id = setInterval(() => {
-      if (!canvas || !video) return;
-      ctx.drawImage(video, 0, 0);
+      if (!canvasRef.current || !videoRef.current) return;
+      ctx.drawImage(videoRef.current, 0, 0);
       reader.decode(ctx.getImageData(0, 0, props.width, props.width));
     },props.scanInterval || 300);
     return () => {
       clearInterval(id);
     };
-  }, [video, canvas, props.mediaStream]);
+  }, [videoRef.current, canvasRef.current, props.mediaStream]);
   return (
     <div style={{ height: props.height, width: props.width, display: 'inline-block', backgroundColor: '#efefef' }}>
-      <video ref={e => setVideo(e)} autoPlay={true} width={'100%'} height={'100%'} />
-      <canvas ref={e => setCanvas(e)} style={{ display: 'none' }} height={props.height} width={props.width} />
+      <video ref={videoRef} autoPlay={true} width={'100%'} height={'100%'} />
+      <canvas ref={canvasRef} style={{ display: 'none' }} height={props.height} width={props.width} />
     </div>
   );
 }
