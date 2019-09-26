@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import styles from './index.css';
 import Scanner from '@/components/Scanner';
 import { Modal, Card, message, Checkbox } from 'antd';
@@ -30,48 +30,56 @@ export default function() {
   const [text, setText] = useState('');
   const [copyRightNow, setCopyRightNow] = useState(true);
   const [mediaStream, setMediaStream] = useState<MediaStream|null|undefined>();
-  const copy = t => () => {
+  const copy = useCallback(t => {
+    if (!window.utils) {
+      window.utils = { setText: console.log }
+    }
     window.utils.setText(t);
     message.success('已复制');
-  };
-  const handleResult = newText => {
+  }, []);
+  const handleResult = useCallback(newText => {
     console.log(newText, Date.now());
     setText(newText);
-  };
-  const handleCheckChange = e => {
-    setCopyRightNow(e.target.checked);
-  };
-  const retry = () => {
-    Modal.error({
-      content: '摄像头调用失败~',
-      okText: '重试',
-      onOk: reload,
-      cancelText: '先这样...',
-    });
-  };
-  useEffect(() => {
-    if (copyRightNow && text) {
-      copy(text)();
-    }
-  }, [text, copyRightNow]);
-  useEffect(() => {
-    (async () => {
-      const m = await getMediaStream().catch(retry);
-      if (m) setMediaStream(m);
-    })();
   }, []);
-  const reload = async () => {
-    if (!mediaStream) return;
-    mediaStream.getVideoTracks().forEach(m => m.stop());
+  const handleCheckChange = useCallback(e => {
+    setCopyRightNow(e.target.checked);
+  }, []);
+  const loadVideo = useCallback(async () => {
+    if (mediaStream) {
+      mediaStream.getVideoTracks().forEach(m => m.stop());
+    }
     const m = await getMediaStream().catch(retry);
     if (m) setMediaStream(m);
-  };
+  }, [mediaStream]);
+  const retry = useCallback((error) => {
+    const modal = Modal.confirm({
+      content: '摄像头调用失败~',
+      okText: '重试',
+      onOk: async () => {
+        modal.destroy();
+        await loadVideo()
+      },
+      cancelText: '先这样...',
+    });
+    throw error;
+  }, [loadVideo]);
+  useEffect(() => {
+    if (copyRightNow && text) {
+      copy(text);
+    }
+  }, [text, copyRightNow]);
+  useLayoutEffect(() => {
+    loadVideo().then();
+  }, []);
+  const handleCopy = useCallback(() => {
+    copy(text);
+  }, [text]);
   return (
     <div className={styles.normal}>
       <Checkbox checked={copyRightNow} onChange={handleCheckChange}>
         <span style={{ userSelect: 'none' }}>扫描即复制</span>
       </Checkbox>
-      &nbsp;<a onClick={reload} style={{ userSelect: 'none' }}>重载摄像头</a>
+      &nbsp;<a onClick={loadVideo} style={{ userSelect: 'none' }}>重载摄像头</a>
       <div style={{ textAlign: 'center', marginBottom: '20px' }}>
         <Scanner
           mediaStream={mediaStream}
@@ -81,7 +89,7 @@ export default function() {
           width={WIDTH}
         />
       </div>
-      <Content onClick={copy(text)}>{text}</Content>
+      <Content onClick={handleCopy}>{text}</Content>
     </div>
   );
 }
