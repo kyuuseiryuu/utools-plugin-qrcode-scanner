@@ -19,10 +19,8 @@ const Content = ({ children, ...props }) => {
 };
 
 const getMediaStream = async (): Promise<MediaStream> => {
-  return new Promise<MediaStream>((resolve, reject) => {
-    navigator.getUserMedia({
-      video: { width: WIDTH, height: HEIGHT },
-    }, resolve, reject);
+  return navigator.mediaDevices.getUserMedia({
+    video: { width: WIDTH, height: HEIGHT },
   });
 };
 
