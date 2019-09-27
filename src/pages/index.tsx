@@ -32,7 +32,6 @@ export default function() {
 
   const handleCopyClick = useCallback(() => {
     if (!text) return;
-    console.log('ready to copy' ,text);
     if (window.setText) {
       window.setText(text);
     } else {
@@ -66,9 +65,7 @@ export default function() {
   }, [loadVideo]);
 
   useEffect(() => {
-    console.log('copy mode or text change', { copyRightNow, text });
     if (copyRightNow && text) {
-      console.log('copy right now', text);
       handleCopyClick();
     }
   }, [text, copyRightNow]);
