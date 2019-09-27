@@ -7,5 +7,12 @@
 .card {
   background: #769fd5;
   color: white;
+  user-select: none;
+  word-break: break-all;
+}
+
+.card:active {
+  background: #389e0d;
+  color: white;
   word-break: break-all;
 }

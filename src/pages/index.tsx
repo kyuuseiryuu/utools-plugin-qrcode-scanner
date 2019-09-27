@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 import styles from './index.css';
 import Scanner from '@/components/Scanner';
 import { Modal, Card, message, Checkbox } from 'antd';
+import copyTextToClipboard from 'copy-text-to-clipboard';
 message.config({ maxCount: 1 });
 
 declare const window: any;
@@ -28,27 +29,29 @@ export default function() {
   const [text, setText] = useState('');
   const [copyRightNow, setCopyRightNow] = useState(true);
   const [mediaStream, setMediaStream] = useState<MediaStream|null|undefined>();
-  const copy = useCallback(t => {
-    if (!window.utils || !window.utils.setText) {
-      window.utils = { setText: console.log }
+
+  const handleCopyClick = useCallback(() => {
+    if (!text) return;
+    console.log('ready to copy' ,text);
+    if (window.setText) {
+      window.setText(text);
+    } else {
+      copyTextToClipboard(text);
     }
-    window.utils.setText(t);
     message.success('已复制');
-  }, []);
-  const handleResult = useCallback(newText => {
-    console.log(newText, Date.now());
-    setText(newText);
-  }, []);
+  }, [text]);
+
   const handleCheckChange = useCallback(e => {
     setCopyRightNow(e.target.checked);
   }, []);
+
   const loadVideo = useCallback(async () => {
     if (mediaStream) {
       mediaStream.getVideoTracks().forEach(m => m.stop());
     }
-    const m = await getMediaStream().catch(retry);
-    if (m) setMediaStream(m);
+    setMediaStream(await getMediaStream().catch(retry));
   }, [mediaStream]);
+
   const retry = useCallback((error) => {
     const modal = Modal.confirm({
       content: '摄像头调用失败~',
@@ -61,23 +64,19 @@ export default function() {
     });
     throw error;
   }, [loadVideo]);
+
   useEffect(() => {
+    console.log('copy mode or text change', { copyRightNow, text });
     if (copyRightNow && text) {
-      copy(text);
+      console.log('copy right now', text);
+      handleCopyClick();
     }
   }, [text, copyRightNow]);
+
   useLayoutEffect(() => {
     loadVideo().then();
   }, []);
-  const handleCopy = useCallback(() => {
-    copy(text);
-  }, [text]);
-  useEffect(() => {
-    if (!window.utils || !window.utils.getMediaStream) {
-      if (!window.utils) window.utils = {};
-      window.utils.getMediaStream = getMediaStream;
-    }
-  }, []);
+
   return (
     <div className={styles.normal}>
       <Checkbox checked={copyRightNow} onChange={handleCheckChange}>
@@ -88,12 +87,12 @@ export default function() {
         <Scanner
           mediaStream={mediaStream}
           scanInterval={100}
-          onResult={handleResult}
+          onResult={setText}
           height={HEIGHT}
           width={WIDTH}
         />
       </div>
-      <Content onClick={handleCopy}>{text}</Content>
+      <Content onClick={handleCopyClick}>{text}</Content>
     </div>
   );
 }
