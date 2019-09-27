@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import styles from './index.css';
 import Scanner from '@/components/Scanner';
-import { Modal, Card, message, Checkbox } from 'antd';
+import { Modal, Card, message, Checkbox, Button } from 'antd';
 import copyTextToClipboard from 'copy-text-to-clipboard';
 message.config({ maxCount: 1 });
 

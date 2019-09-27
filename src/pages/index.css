@@ -12,7 +12,5 @@
 }
 
 .card:active {
-  background: #389e0d;
-  color: white;
-  word-break: break-all;
+  background: #4073bf;
 }

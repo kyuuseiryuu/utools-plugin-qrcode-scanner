@@ -9,6 +9,7 @@
     "precommit": "lint-staged"
   },
   "dependencies": {
+    "antd": "^3.23.4",
     "copy-text-to-clipboard": "^2.1.1",
     "qrcode-reader": "^1.0.4",
     "react": "^16.7.0",
